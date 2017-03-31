@@ -29,12 +29,10 @@
 - (void)setItemLabelSelectColor:(UIColor *)itemLabelSelectColor
 {
     _itemLabelSelectColor = itemLabelSelectColor;
-//    [self.itemButton setTitleColor:itemLabelSelectColor forState:UIControlStateNormal];
 }
 - (void)setItemLabelSelectFontSize:(CGFloat)itemLabelSelectFontSize
 {
     _itemLabelSelectFontSize = itemLabelSelectFontSize;
-//    [self.itemButton.titleLabel setFont:[UIFont systemFontOfSize:itemLabelSelectFontSize]];
 }
 - (void)setItemLabelNormalColor:(UIColor *)itemLabelNormalColor
 {
