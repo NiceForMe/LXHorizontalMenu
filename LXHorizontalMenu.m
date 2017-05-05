@@ -19,7 +19,6 @@
 #import "LXRootMenuCell.h"
 #import "LXSortMenuCell.h"
 
-
 static NSString *topId = @"topId";
 static NSString *rootId = @"rootViewIdentifier";
 static NSString *sortId = @"sortId";
@@ -35,13 +34,13 @@ static NSString *rest = @"rootss";
 @property (nonatomic,strong) UICollectionView *rootMenu;
 @property (nonatomic,strong) UICollectionView *sortMenu;
 @property (nonatomic,strong) NSMutableArray *currentItemArray;
-@property (nonatomic,assign) CGFloat topMenuHeight;
 @property (nonatomic,strong) NSIndexPath *lastIndex;
 @property (nonatomic,assign) NSInteger currentIndex;
 @property (nonatomic,strong) UIButton *lastButton;
+@property (nonatomic,strong) UIButton *sortMenuButton;
 @property (nonatomic,assign) BOOL isFirstLoad;
-@property (nonatomic,assign) BOOL showSortMenu;
 @property (nonatomic,assign) BOOL isSortMenuExist;
+@property (nonatomic,assign) CGSize topMenuSize;
 @property (nonatomic,strong) UIView *containerView;
 @property (nonatomic,strong) UIButton *selectButton;
 
@@ -50,30 +49,35 @@ static NSString *rest = @"rootss";
 @property (nonatomic,strong) NSMutableArray *sRootArray;
 @end
 
+
 @implementation LXHorizontalMenu
 
+@synthesize itemLabelNormalFontSize = _itemLabelNormalFontSize;
+@synthesize itemLabelNormalColor = _itemLabelNormalColor;
+@synthesize itemLabelSelectColor = _itemLabelSelectColor;
+@synthesize itemLabelSelectFontSize = _itemLabelSelectFontSize;
+@synthesize topMenuBackGoundColor = _topMenuBackGoundColor;
 
-- (instancetype)initWithFrame:(CGRect)frame showSortMenu:(BOOL)showSortMenu currentItemArray:(NSMutableArray *)currentItemArray restItemArray:(NSMutableArray *)restItemArray rootMenuItems:(NSMutableArray *)rootMenuItems topMenuHeight:(CGFloat)topMenuHeight
+#pragma mark - 初始化
+- (instancetype)initWithFrame:(CGRect)frame ShowSortMenu:(BOOL)ShowSortMenu currentItemArray:(NSMutableArray *)currentItemArray restItemArray:(NSMutableArray *)restItemArray rootMenuItems:(NSMutableArray *)rootMenuItems topMenuSize:(CGSize)topMenuSize
 {
     if (self = [super initWithFrame:frame]) {
         self.isSortMenuExist = NO;
-        self.showSortMenu = showSortMenu;
         self.currentItemArray = currentItemArray;
         self.restItemArray = restItemArray;
         self.rootMenuItems = rootMenuItems;
-        self.topMenuHeight = topMenuHeight;
+        self.topMenuSize = topMenuSize;
         self.isFirstLoad = YES;
         [self addSubview:self.containerView];
         [self.containerView addSubview:self.topMenu];
         [self addSubview:self.rootMenu];
-        [self addSubview:self.sortMenu];
-        if (self.showSortMenu) {
-            [self.containerView addSubview:self.selectButton];
+        if (ShowSortMenu) {
+            [self.containerView addSubview:self.sortMenuButton];
+            [self addSubview:self.sortMenu];
         }
     }
     return self;
 }
-
 #pragma mark - lazy load
 - (NSMutableArray *)sCurrentArray
 {
@@ -121,36 +125,32 @@ static NSString *rest = @"rootss";
 {
     if (!_containerView) {
         _containerView = [[UIView alloc]init];
-        _containerView.backgroundColor = [UIColor whiteColor];
-        _containerView.frame = CGRectMake(0, 0, ScreenWidth, self.topMenuHeight);
+        _containerView.backgroundColor = [UIColor clearColor];
+        _containerView.frame = CGRectMake(0, 0, self.frame.size.width, self.topMenuSize.height);
     }
     return _containerView;
 }
-- (UIButton *)selectButton
+- (UIButton *)sortMenuButton
 {
-    if (!_selectButton) {
-        _selectButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _selectButton.backgroundColor = [UIColor yellowColor];
-        _selectButton.frame = CGRectMake(CGRectGetMaxX(self.topMenu.frame), 0, self.topMenuHeight, self.topMenuHeight);
-        [_selectButton addTarget:self action:@selector(showSelectMenu) forControlEvents:UIControlEventTouchUpInside];
+    if (!_sortMenuButton) {
+        _sortMenuButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        _sortMenuButton.backgroundColor = [UIColor yellowColor];
+        [_sortMenuButton setImage:[UIImage imageNamed:@"1"] forState:UIControlStateNormal];
+        _sortMenuButton.frame = CGRectMake(CGRectGetMaxX(self.topMenu.frame), CGRectGetMinY(self.topMenu.frame), self.containerView.frame.size.width - self.topMenuSize.width, self.topMenuSize.height);
+        [_sortMenuButton addTarget:self action:@selector(showSortMenu) forControlEvents:UIControlEventTouchUpInside];
     }
-    return _selectButton;
+    return _sortMenuButton;
 }
 - (UICollectionView *)topMenu
 {
     if (!_topMenu) {
         UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc]init];
         layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
-        if (self.showSortMenu) {
-            _topMenu = [[UICollectionView alloc]initWithFrame:CGRectMake(0, 0, ScreenWidth - self.topMenuHeight, self.topMenuHeight) collectionViewLayout:layout];
-        }else{
-            _topMenu = [[UICollectionView alloc]initWithFrame:CGRectMake(0, 0, ScreenWidth, self.topMenuHeight) collectionViewLayout:layout];
-        }
-        
+        _topMenu = [[UICollectionView alloc]initWithFrame:CGRectMake(0, 0, self.topMenuSize.width, self.topMenuSize.height) collectionViewLayout:layout];
         _topMenu.showsHorizontalScrollIndicator = NO;
+        _topMenu.backgroundColor = self.topMenuBackGoundColor;
         _topMenu.dataSource = self;
         _topMenu.delegate = self;
-        _topMenu.backgroundColor = [UIColor lightGrayColor];
         [_topMenu autoresizesSubviews];
         _topMenu.pagingEnabled = YES;
         [_topMenu reloadData];
@@ -180,10 +180,10 @@ static NSString *rest = @"rootss";
     if (!_sortMenu) {
         UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc]init];
         layout.scrollDirection = UICollectionViewScrollDirectionVertical;
-        layout.headerReferenceSize = CGSizeMake(ScreenWidth, self.topMenuHeight);
+        layout.headerReferenceSize = CGSizeMake(ScreenWidth, self.topMenuSize.height);
         layout.minimumLineSpacing = 10;
         layout.minimumInteritemSpacing = 0;
-        _sortMenu = [[UICollectionView alloc]initWithFrame:CGRectMake(0, CGRectGetMaxY(self.topMenu.frame), 0, 0) collectionViewLayout:layout];
+        _sortMenu = [[UICollectionView alloc]initWithFrame:CGRectMake(0, CGRectGetMaxY(self.topMenu.frame), ScreenWidth, 0) collectionViewLayout:layout];
         UILongPressGestureRecognizer *longGesture = [[UILongPressGestureRecognizer alloc]initWithTarget:self action:@selector(handleLongGesture:)];
         [_sortMenu addGestureRecognizer:longGesture];
         _sortMenu.showsHorizontalScrollIndicator = YES;
@@ -227,18 +227,26 @@ static NSString *rest = @"rootss";
         [_topMenu registerClass:[LXTopMenuCell class] forCellWithReuseIdentifier:identifier];
         LXTopMenuCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
         if (cell.stateType == LXTopMenuCellSelectStateType) {
-            cell.itemLabelNormalColor = self.itemLabelSelectColor;
-            cell.itemLabelNormalFontSize = self.itemLabelSelectFontSize;
+            cell.itemLabelNormalColor = _itemLabelSelectColor;
+            cell.itemLabelNormalFontSize = _itemLabelSelectFontSize;
         }else{
-            cell.itemLabelNormalColor = self.itemLabelNormalColor;
-            cell.itemLabelNormalFontSize = self.itemLabelNormalFontSize;
+            if (_itemLabelNormalColor != nil) {
+                cell.itemLabelNormalColor = _itemLabelNormalColor;
+            }else{
+                cell.itemLabelNormalColor = self.itemLabelNormalColor;
+            }
+            if (_itemLabelNormalFontSize != 0) {
+                cell.itemLabelNormalFontSize = _itemLabelNormalFontSize;
+            }else{
+                cell.itemLabelNormalFontSize = self.itemLabelNormalFontSize;
+            }
         }
         [cell.itemButton setTitle:self.currentItemArray[indexPath.row] forState:UIControlStateNormal];
         cell.itemButton.tag = indexPath.row;
         [cell.itemButton addTarget:self action:@selector(showWithButton:) forControlEvents:UIControlEventTouchUpInside];
         CGSize itemSize = [self getWidthWithString:self.currentItemArray[indexPath.row]];
         CGRect itemFrame = cell.itemButton.frame;
-        itemFrame = CGRectMake(0, 0, itemSize.width, self.topMenuHeight);
+        itemFrame = CGRectMake(0, 0, itemSize.width, self.topMenuSize.height);
         if (self.type == LXHorizontalMenuTopMenuCommonType) {
             cell.itemButton.frame = itemFrame;
         }else{
@@ -371,15 +379,19 @@ static NSString *rest = @"rootss";
         }
     }];
 }
-#pragma mark - showSelectMenu
-- (void)showSelectMenu
+#pragma mark - showSortMenu
+- (void)showSortMenu
 {
     if (self.isSortMenuExist) {
         self.isSortMenuExist = NO;
-        self.sortMenu.frame = CGRectMake(0, CGRectGetMaxY(self.containerView.frame), 0, 0);
+        [UIView animateWithDuration:0.2 animations:^{
+            self.sortMenu.frame = CGRectMake(0, CGRectGetMaxY(self.topMenu.frame), ScreenWidth, 0);
+        }];
     }else{
-        [UIView animateWithDuration:0.3 animations:^{
-            self.sortMenu.frame = CGRectMake(0, CGRectGetMaxY(self.containerView.frame), ScreenWidth, self.rootMenu.frame.size.height);
+        [UIView animateWithDuration:1.0 delay:0.0 usingSpringWithDamping:5.0 initialSpringVelocity:10 options:UIViewAnimationOptionCurveEaseIn animations:^{
+            self.sortMenu.frame = CGRectMake(0, CGRectGetMaxY(self.topMenu.frame), ScreenWidth, ScreenHeight);
+        } completion:^(BOOL finished) {
+            
         }];
         self.isSortMenuExist = YES;
     }
@@ -412,7 +424,6 @@ static NSString *rest = @"rootss";
 #pragma mark - shake start and stop
 - (void)allCellStartShake
 {
-    //1.创建和新动画
     CAKeyframeAnimation *keyAnimation = [CAKeyframeAnimation animation];
     keyAnimation.keyPath = @"transform.rotation";
     keyAnimation.values = @[@(-angle2Radian(CellShakeNumber)),@(angle2Radian(CellShakeNumber)),@(-angle2Radian(CellShakeNumber))];
@@ -430,8 +441,6 @@ static NSString *rest = @"rootss";
         [cell.layer removeAllAnimations];
     }
 }
-
-
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
     if (scrollView == self.rootMenu) {
@@ -457,9 +466,9 @@ static NSString *rest = @"rootss";
             if (self.type == LXHorizontalMenuTopMenuCommonType) {
                 NSString *itemStr = self.currentItemArray[indexPath.row];
                 CGSize size = [self getWidthWithString:itemStr];
-                return CGSizeMake(size.width, self.topMenuHeight);
+                return CGSizeMake(size.width, self.topMenuSize.height);
             }else{
-                return CGSizeMake((self.topMenu.frame.size.width - (self.currentItemArray.count + 1) * NormalMargin)  / self.currentItemArray.count, self.topMenuHeight);
+                return CGSizeMake((self.topMenu.frame.size.width - (self.currentItemArray.count + 1) * NormalMargin)  / self.currentItemArray.count, self.topMenuSize.height);
             }
         }
     }else if (collectionView == self.rootMenu){
@@ -474,7 +483,42 @@ static NSString *rest = @"rootss";
     CGSize size = [string sizeWithAttributes:attrs];
     return size;
 }
-
+#pragma mark - getter
+- (UIColor *)topMenuBackGoundColor
+{
+    if (!_topMenuBackGoundColor) {
+        _topMenuBackGoundColor = [UIColor whiteColor];
+    }
+    return _topMenuBackGoundColor;
+}
+- (CGFloat)itemLabelNormalFontSize
+{
+    if (!_itemLabelNormalFontSize) {
+        _itemLabelNormalFontSize = 13;
+    }
+    return _itemLabelNormalFontSize;
+}
+- (CGFloat)itemLabelSelectFontSize
+{
+    if (!_itemLabelSelectFontSize) {
+        _itemLabelSelectFontSize = 17;
+    }
+    return _itemLabelSelectFontSize;
+}
+- (UIColor *)itemLabelNormalColor
+{
+    if (!_itemLabelNormalColor) {
+        _itemLabelNormalColor = [UIColor blackColor];
+    }
+    return _itemLabelNormalColor;
+}
+- (UIColor *)itemLabelSelectColor
+{
+    if (!_itemLabelSelectColor) {
+        _itemLabelSelectColor = [UIColor blueColor];
+    }
+    return _itemLabelSelectColor;
+}
 #pragma mark - setter
 - (void)setSortButtonImage:(UIImage *)sortButtonImage
 {

@@ -75,7 +75,7 @@ typedef NS_ENUM(NSInteger,LXHorizontalTopMenuType){
  @param topMenuHeight top menu height
  @return
  */
-- (instancetype)initWithFrame:(CGRect)frame showSortMenu:(BOOL)showSortMenu currentItemArray:(NSMutableArray *)currentItemArray restItemArray:(NSMutableArray *)restItemArray rootMenuItems:(NSMutableArray *)rootMenuItems topMenuHeight:(CGFloat)topMenuHeight;
+- (instancetype)initWithFrame:(CGRect)frame ShowSortMenu:(BOOL)ShowSortMenu currentItemArray:(NSMutableArray *)currentItemArray restItemArray:(NSMutableArray *)restItemArray rootMenuItems:(NSMutableArray *)rootMenuItems topMenuSize:(CGSize)topMenuSize;
 @end
 
 /**
