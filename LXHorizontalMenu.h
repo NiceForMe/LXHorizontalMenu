@@ -47,6 +47,11 @@ typedef NS_ENUM(NSInteger,LXHorizontalTopMenuType){
 @property (nonatomic,strong) UIColor *topMenuBackGoundColor;
 
 /**
+ indicatorLineColor
+ */
+@property (nonatomic,strong) UIColor *indicatorLineColor;
+
+/**
  常规字体大小
  */
 @property (nonatomic,assign) CGFloat itemLabelNormalFontSize;

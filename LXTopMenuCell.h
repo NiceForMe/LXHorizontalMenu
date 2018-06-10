@@ -20,4 +20,6 @@ typedef NS_ENUM(NSInteger,LXTopMenuCellStateType){
 @property (nonatomic,assign) CGFloat itemLabelNormalFontSize;
 @property (nonatomic,assign) CGFloat itemLabelSelectFontSize;
 @property (nonatomic,strong) UIButton *itemButton;
+@property (nonatomic,strong) UIColor *indicatorLineColor;
+@property (nonatomic,strong) UIView *indicatorLine;
 @end

@@ -18,6 +18,9 @@
 #import "LXTopMenuCell.h"
 #import "LXRootMenuCell.h"
 #import "LXSortMenuCell.h"
+#import "Masonry.h"
+#import <objc/runtime.h>
+
 
 static NSString *topId = @"topId";
 static NSString *rootId = @"rootViewIdentifier";
@@ -33,6 +36,7 @@ static NSString *rest = @"rootss";
 @property (nonatomic,strong) UICollectionView *topMenu;
 @property (nonatomic,strong) UICollectionView *rootMenu;
 @property (nonatomic,strong) UICollectionView *sortMenu;
+@property (nonatomic,strong) LXTopMenuCell *topMenuCell;
 @property (nonatomic,strong) NSMutableArray *currentItemArray;
 @property (nonatomic,strong) NSIndexPath *lastIndex;
 @property (nonatomic,assign) NSInteger currentIndex;
@@ -43,6 +47,7 @@ static NSString *rest = @"rootss";
 @property (nonatomic,assign) CGSize topMenuSize;
 @property (nonatomic,strong) UIView *containerView;
 @property (nonatomic,strong) UIButton *selectButton;
+@property (nonatomic,strong) UIView *separateLine;
 
 @property (nonatomic,strong) NSMutableArray *sCurrentArray;
 @property (nonatomic,strong) NSMutableArray *sRestArray;
@@ -226,6 +231,8 @@ static NSString *rest = @"rootss";
         NSString *identifier = [NSString stringWithFormat:@"%ld%ld",(long)indexPath.section,(long)indexPath.row];
         [_topMenu registerClass:[LXTopMenuCell class] forCellWithReuseIdentifier:identifier];
         LXTopMenuCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
+        cell.indicatorLineColor = _indicatorLineColor;
+        self.topMenuCell = cell;
         if (cell.stateType == LXTopMenuCellSelectStateType) {
             cell.itemLabelNormalColor = _itemLabelSelectColor;
             cell.itemLabelNormalFontSize = _itemLabelSelectFontSize;
@@ -249,10 +256,15 @@ static NSString *rest = @"rootss";
         itemFrame = CGRectMake(0, 0, itemSize.width, self.topMenuSize.height);
         if (self.type == LXHorizontalMenuTopMenuCommonType) {
             cell.itemButton.frame = itemFrame;
+            [cell.contentView addSubview:cell.itemButton];
         }else{
-            cell.itemButton.frame = cell.contentView.bounds;
+            [cell.contentView addSubview:cell.itemButton];
+            [cell.itemButton mas_makeConstraints:^(MASConstraintMaker *make) {
+                make.center.equalTo(cell.contentView);
+                make.height.equalTo(cell.contentView);
+                make.width.mas_equalTo(itemSize.width);
+            }];
         }
-        [cell.contentView addSubview:cell.itemButton];
         if (self.isFirstLoad == YES && indexPath.row == 0) {
             [self showWithButton:cell.itemButton];
             self.isFirstLoad = NO;
@@ -359,6 +371,7 @@ static NSString *rest = @"rootss";
         [topCell.itemButton setTitleColor:self.itemLabelNormalColor forState:UIControlStateNormal];
         [topCell.itemButton.titleLabel setFont:[UIFont systemFontOfSize:self.itemLabelNormalFontSize]];
     }
+    
     self.lastButton = button;
     LXTopMenuCell *topCell = (LXTopMenuCell *)button.superview.superview;
     topCell.stateType = LXTopMenuCellSelectStateType;
@@ -373,7 +386,7 @@ static NSString *rest = @"rootss";
     [UIView animateWithDuration:0.0 animations:^{
         CGFloat topWidth = self.topMenu.frame.size.width;
         if (topCell.center.x < topWidth / 2) {
-            [self.topMenu setContentOffset:CGPointZero];
+//            [self.topMenu setContentOffset:CGPointZero];
         }else if (topCell.center.x > topWidth / 2){
             [self.topMenu scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
         }
