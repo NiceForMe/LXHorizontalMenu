@@ -1,9 +1,9 @@
 //
 //  ViewController.m
-//  HorizontalMenuDebug
+//  LXHorizontalMenu
 //
-//  Created by HSEDU on 2019/5/4.
-//  Copyright © 2019年 HSEDU. All rights reserved.
+//  Created by mac on 2019/6/1.
+//  Copyright © 2019年 mac. All rights reserved.
 //
 
 #import "ViewController.h"
@@ -85,7 +85,8 @@
     [self.view addSubview:menu];
     UIButton *sortBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     sortBtn.frame = CGRectMake(MenuWidth - 50, 0, 50, 50);
-    sortBtn.backgroundColor = [UIColor redColor];
+    [sortBtn setTitle:@"Sort" forState:UIControlStateNormal];
+    sortBtn.backgroundColor = [UIColor lightGrayColor];
     [sortBtn addTarget:self action:@selector(showSortMenu) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:sortBtn];
 }
@@ -117,9 +118,7 @@
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc]init];
     layout.scrollDirection = UICollectionViewScrollDirectionVertical;
     layout.headerReferenceSize = CGSizeMake(MenuWidth, 50);
-    layout.minimumLineSpacing = 10;
-    layout.minimumInteritemSpacing = 10;
-    layout.itemSize = CGSizeMake((MenuWidth - 4 * 10) / 3, 40);
+    layout.itemSize = CGSizeMake((MenuWidth - 5 * 10) / 3, 40);
     layout.sectionInset = UIEdgeInsetsMake(10, 10, 10, 10);
     UICollectionView *sortMenu = [[UICollectionView alloc]initWithFrame:CGRectMake(0, CGRectGetMinY(self.menu.frame) + 50, MenuWidth, 0) collectionViewLayout:layout];
     self.sortMenu = sortMenu;

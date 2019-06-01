@@ -1,9 +1,9 @@
 //
 //  AppDelegate.m
-//  HorizontalMenuDebug
+//  LXHorizontalMenu
 //
-//  Created by HSEDU on 2019/5/4.
-//  Copyright © 2019年 HSEDU. All rights reserved.
+//  Created by mac on 2019/6/1.
+//  Copyright © 2019年 mac. All rights reserved.
 //
 
 #import "AppDelegate.h"
